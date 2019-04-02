@@ -1,16 +1,14 @@
 package com.robot;
 
-import java.util.List;
-
 public class Response<T> {
 	private Esito result;
-	private List<T> content;
+	private T content;
 
 	public Esito getEsito() {
 		return result;
 	}
 
-	public Response(Esito esito, List<T> response) {
+	public Response(Esito esito, T response) {
 		this.result = esito;
 		this.setContent(response);
 	}
@@ -22,11 +20,11 @@ public class Response<T> {
 		this.result = esito;
 	}
 
-	public List<T> getContent() {
+	public T getContent() {
 		return content;
 	}
 
-	public void setContent(List<T> content) {
+	public void setContent(T content) {
 		this.content = content;
 	}
 

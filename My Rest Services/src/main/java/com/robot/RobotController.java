@@ -1,13 +1,11 @@
 package com.robot;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +17,7 @@ import com.robot.utils.ApplicationProperties;
 import robot.RobotPosition;
 import robot.RobotStatics;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @SpringBootApplication
 public class RobotController {
@@ -36,10 +35,8 @@ public class RobotController {
 		if (RobotStatics.validate(robot)) {
 			Esito esito = new Esito(properties.getResponse().get("successCode"),
 					properties.getResponse().get("succesDescription"));
-			List<RobotPosition> list = new ArrayList<RobotPosition>();
-			list.add(robot);
 			resp.setEsito(esito);
-			resp.setContent(list);
+			resp.setContent(robot);
 			return resp;
 		} else {
 			Esito esito = new Esito(properties.getResponse().get("lostCode"),
@@ -58,11 +55,9 @@ public class RobotController {
 		if (resp.getEsito()!= null && resp.getEsito().getCode().equals(properties.getResponse().get("facingError"))) return resp;
 		Esito esito = new Esito(properties.getResponse().get("successCode"),
 				properties.getResponse().get("succesDescription"));
-		List<RobotPosition> list = new ArrayList<RobotPosition>();
 		RobotStatics.rotateRight(robot);
-		list.add(robot);
 		resp.setEsito(esito);
-		resp.setContent(list);
+		resp.setContent(robot);
 		return resp;
 
 	}
@@ -74,11 +69,9 @@ public class RobotController {
 		if (resp.getEsito()!= null && resp.getEsito().getCode().equals(properties.getResponse().get("facingError"))) return resp;
 		Esito esito = new Esito(properties.getResponse().get("successCode"),
 				properties.getResponse().get("succesDescription"));
-		List<RobotPosition> list = new ArrayList<RobotPosition>();
 		RobotStatics.rotateLeft(robot);
-		list.add(robot);
 		resp.setEsito(esito);
-		resp.setContent(list);
+		resp.setContent(robot);
 		return resp;
 	}
 
@@ -91,10 +84,8 @@ public class RobotController {
 		if (RobotStatics.validate(robot)) {
 			Esito esito = new Esito(properties.getResponse().get("successCode"),
 					properties.getResponse().get("succesDescription"));
-			List<RobotPosition> list = new ArrayList<RobotPosition>();
-			list.add(robot);
 			resp.setEsito(esito);
-			resp.setContent(list);
+			resp.setContent(robot);
 			return resp;
 		} else {
 			Esito esito = new Esito(properties.getResponse().get("lostCode"),
