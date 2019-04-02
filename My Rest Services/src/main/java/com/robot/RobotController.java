@@ -1,6 +1,5 @@
 package com.robot;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,51 +22,103 @@ import robot.RobotStatics;
 @RestController
 @SpringBootApplication
 public class RobotController {
-	
+
 	@Autowired
 	private ApplicationProperties properties;
 
 	@GetMapping("/toyRobot/place")
-	Response<RobotPosition> place (@RequestParam String column, @RequestParam String row, @RequestParam String facing, HttpServletResponse httpResponse) {
+	Response<RobotPosition> place(@RequestParam String column, @RequestParam String row, @RequestParam String facing,
+			HttpServletResponse httpResponse) {
+		RobotPosition robot = new RobotPosition(row, column, facing);
 		Response<RobotPosition> resp = new Response<>();
-		if (!properties.getAcceptedFacings().contains(facing)) {
-			Esito esito = new Esito(properties.getResponse().get("facingError"), properties.getResponse().get("facingErrorDescription"));
+		resp = checkFacing(httpResponse, robot);
+		if (resp.getEsito()!= null && resp.getEsito().getCode().equals(properties.getResponse().get("facingError"))) return resp;		
+		if (RobotStatics.validate(robot)) {
+			Esito esito = new Esito(properties.getResponse().get("successCode"),
+					properties.getResponse().get("succesDescription"));
+			List<RobotPosition> list = new ArrayList<RobotPosition>();
+			list.add(robot);
 			resp.setEsito(esito);
-			httpResponse.setStatus(500);
+			resp.setContent(list);
+			return resp;
+		} else {
+			Esito esito = new Esito(properties.getResponse().get("lostCode"),
+					properties.getResponse().get("lostDescription"));
+			resp.setEsito(esito);
+			resp.setContent(null);
 			return resp;
 		}
-		
-		RobotPosition robot = new RobotPosition(row, column, facing);	
-		Esito esito = new Esito(properties.getResponse().get("successCode"), properties.getResponse().get("succesDescription"));
-		List<RobotPosition> list = new ArrayList<RobotPosition>();
-		list.add(robot);
-		resp.setEsito(esito);
-		resp.setContent(list);
-		return resp;
-		
-		
+
 	}
-	
+
 	@PostMapping("/toyRobot/right")
-	Response<RobotPosition> right (@RequestBody RobotPosition robot) {
+	Response<RobotPosition> right(@RequestBody RobotPosition robot, HttpServletResponse httpResponse) {
 		Response<RobotPosition> resp = new Response<>();
-		Esito esito = new Esito(properties.getResponse().get("successCode"), properties.getResponse().get("succesDescription"));
+		resp = checkFacing(httpResponse, robot);
+		if (resp.getEsito()!= null && resp.getEsito().getCode().equals(properties.getResponse().get("facingError"))) return resp;
+		Esito esito = new Esito(properties.getResponse().get("successCode"),
+				properties.getResponse().get("succesDescription"));
 		List<RobotPosition> list = new ArrayList<RobotPosition>();
 		RobotStatics.rotateRight(robot);
 		list.add(robot);
 		resp.setEsito(esito);
 		resp.setContent(list);
 		return resp;
-		
+
 	}
-	
+
 	@PostMapping("/toyRobot/left")
-	Response<RobotPosition> left (@RequestBody RobotPosition robot) {
-		return null;
+	Response<RobotPosition> left(@RequestBody RobotPosition robot, HttpServletResponse httpResponse) {
+		Response<RobotPosition> resp = new Response<>();
+		resp = checkFacing(httpResponse, robot);
+		if (resp.getEsito()!= null && resp.getEsito().getCode().equals(properties.getResponse().get("facingError"))) return resp;
+		Esito esito = new Esito(properties.getResponse().get("successCode"),
+				properties.getResponse().get("succesDescription"));
+		List<RobotPosition> list = new ArrayList<RobotPosition>();
+		RobotStatics.rotateLeft(robot);
+		list.add(robot);
+		resp.setEsito(esito);
+		resp.setContent(list);
+		return resp;
+	}
+
+	@PostMapping("/toyRobot/move")
+	Response<RobotPosition> move(@RequestBody RobotPosition robot, HttpServletResponse httpResponse) {
+		Response<RobotPosition> resp = new Response<>();
+		resp = checkFacing(httpResponse, robot);
+		if (resp.getEsito()!= null && resp.getEsito().getCode().equals(properties.getResponse().get("facingError"))) return resp;
+		RobotStatics.move(robot);
+		if (RobotStatics.validate(robot)) {
+			Esito esito = new Esito(properties.getResponse().get("successCode"),
+					properties.getResponse().get("succesDescription"));
+			List<RobotPosition> list = new ArrayList<RobotPosition>();
+			list.add(robot);
+			resp.setEsito(esito);
+			resp.setContent(list);
+			return resp;
+		} else {
+			Esito esito = new Esito(properties.getResponse().get("lostCode"),
+					properties.getResponse().get("lostDescription"));
+			resp.setEsito(esito);
+			resp.setContent(null);
+			return resp;
+		}
 		
 	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(RobotController.class, args);
+	}
+
+	private Response<RobotPosition> checkFacing(HttpServletResponse httpResponse, RobotPosition robot) {
+		Response<RobotPosition> resp = new Response<>();
+		if (!properties.getAcceptedFacings().contains(robot.getFacing())) {
+			Esito esito = new Esito(properties.getResponse().get("facingError"),
+					properties.getResponse().get("facingErrorDescription"));
+			resp.setEsito(esito);
+			httpResponse.setStatus(500);
+			return resp;
+		} else
+			return resp;
 	}
 }
